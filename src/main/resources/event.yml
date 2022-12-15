@@ -1,0 +1,33 @@
+#cree une eventbridge eventbus
+EnventBus:
+  Type: AWS::Events::EventBus
+  Properties: 
+    Name: EVENT_BUS
+
+TargetSQS:
+  Type: AWS::SQS::Queue
+  Properties:
+    QueueName: HeiQueue
+
+TargetSQSRule:
+  Type: AWS::Events::Rule
+  Properties: 
+    EventBusName: !GetAtt EventBus.Arn
+    EventPattern:
+    Targets:
+      -Arn: !GetAtt TargetSQS.Arn
+
+TargetSQSPolicy:
+  Type: AWS::SQS::QueuePolicy
+  Properties:
+    Queues: 
+      - !Ref TargetSQS
+    PolicyDocument:
+      Statement:
+        - Effect: "Allow"
+          Action:
+            - "SQS:SendMessage"
+          Resource: !GetAtt TargetSQS.Arn
+          Principal:
+            Service: events.amazonaws.com
+
